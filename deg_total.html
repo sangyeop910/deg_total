@@ -106,8 +106,6 @@
                     al(sWd);
                 }
                 if (spe.value == 'setosa') {
-                    size_slider.min = 2.3, size_slider.max = 4.5, size_slider.value = 2.3;
-                    size_num.min = 2.3, size_num.max = 4.5, size_num.value = 2.3;
                     sto(sWd);
                 }
                 if (spe.value == 'versicolor') {
@@ -169,15 +167,7 @@
                     pWd.push(data2[n4][3]);
                 }
                 draw(sWd, sLen);
-                /*var one = new Array();
-                var two = new Array();
-                for (var j = 0; j < 50; j++) {
-                    one.push(data2[j][0])
-                    two.push(data2[j][1])
-                }
-                one.sort();
-                two.sort();
-                console.log(one, two);*/
+
                 var mod = document.getElementById("mod");
 
                 state = true;
@@ -298,12 +288,14 @@
                     d3.select("svg").remove();
                     size_slider.min = 2, size_slider.max = 4.5, size_slider.value = 2;
                     size_num.min = 2, size_num.max = 4.5, size_num.value = 2;
+                    spe.value = 'all';
                     draw(sWd, sLen);
                 }
                 if (mod.value == 'PetalData') {
                     d3.select("svg").remove();
                     size_slider.min = 0, size_slider.max = 2.6, size_slider.value = 0;
                     size_num.min = 0, size_num.max = 2.6, size_num.value = 0;
+                    spe.value = 'all';
                     draw(pWd, pLen);
                 }
             }
