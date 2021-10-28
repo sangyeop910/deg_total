@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+
+<head>
+    <title>scatter plot</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/d3-color.v1.min.js"></script>
+    <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
+    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+    <style>
+        div {
+            width: 50%;
+            height: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <select id="mod" onchange="changeMod()">
+        <option value="SepalData">SepalData</option>
+        <option value="PetalData">PetalData</option>
+    </select>
+    <select id="spe" onchange="changeSpe()">
+        <option value="all">all</option>
+        <option value="setosa">setosa</option>
+        <option value="versicolor">versicolor</option>
+        <option value="verginica">verginica</option>
+    </select>
+
+    <div data-role="sizeslider">
+        <label for="size_slider" id="size_text">Value:</label>
+        <input name="size_slider" id="size_slider" oninput="SlideValue(this.value)" type="range" min="2" max="4.5" value="2" step="0.1">
+        <input name="size_num" id="size_num" type="number" oninput="SlideValue(this.value)" min="2" max="4.5" value="2" step="0.1">
+    </div>
+
+    <script>
+        var data = new Array();
+        var data2 = new Array();
+        var classes1 = new Array();
+        var classes2 = new Array();
+        var sLen = new Array();
+        var sWd = new Array();
+        var pLen = new Array();
+        var pWd = new Array();
+        var W = 700;
+        var margin = {
+                top: 10,
+                right: 30,
+                bottom: 30,
+                left: 60
+            },
+            width = 700 - margin.left - margin.right,
+            height = 700 - margin.top - margin.bottom;
+        var state = false;
+
+        function SlideValue(val) { //slide value change event
+            var view = document.getElementById("size_slider");
+            var box = document.getElementById("size_num");
+            box.value = val;
+            view.value = val;
+
+            function al(array0) {
+                for (var m1 = 0; m1 < 150; m1++) {
+                    if (array0[m1] < val) {
+                        c1[m1].style.display = 'none';
+                    } else {
+                        c1[m1].style.display = 'block';
+                    }
+                }
+            }
+
+            function sto(array1) {
+                for (var m1 = 0; m1 < 50; m1++) {
+                    if (array1[m1] < val) {
+                        c1[m1].style.display = 'none';
+                    } else {
+                        c1[m1].style.display = 'block';
+                    }
+                }
+            }
+
+            function vsi(array2) {
+                for (var m2 = 50; m2 < 100; m2++) {
+                    if (array2[m2] < val) {
+                        c1[m2].style.display = 'none';
+                    } else {
+                        c1[m2].style.display = 'block';
+                    }
+                }
+            }
+
+            function vgn(array3) {
+                for (var m3 = 100; m3 < 150; m3++) {
+                    if (array3[m3] < val) {
+                        c1[m3].style.display = 'none';
+                    } else {
+                        c1[m3].style.display = 'block';
+                    }
+                }
+            }
+            //==============================================//
+            if (mod.value == 'SepalData') {
+                if (spe.value == 'all') {
+                    al(sWd);
+                }
+                if (spe.value == 'setosa') {
+                    size_slider.min = 2.3, size_slider.max = 4.5, size_slider.value = 2.3;
+                    size_num.min = 2.3, size_num.max = 4.5, size_num.value = 2.3;
+                    sto(sWd);
+                }
+                if (spe.value == 'versicolor') {
+                    vsi(sWd);
+                }
+                if (spe.value == 'verginica') {
+                    vgn(sWd);
+                }
+            }
+            //==============================================//완
+            if (mod.value == 'PetalData') {
+                if (spe.value == 'all') {
+                    al(pWd);
+                }
+                if (spe.value == 'setosa') {
+                    sto(pWd);
+                }
+                if (spe.value == 'versicolor') {
+                    vsi(pWd);
+                }
+                if (spe.value == 'verginica') {
+                    vgn(pWd);
+                }
+            }
+        }
+
+        function get_parm() {
+            return new Array();
+        }
+
+        function wait(t) {
+            return new Promise(resolve => setTimeout(resolve, t))
+        }
+
+        d3.json("https://raw.githubusercontent.com/sangyeop910/iris/main/iris(150).json")
+            .then(result => {
+                const attrs = Object.keys(result[0]).filter(a => {
+                    return (typeof result[0][a] === "number") && !(new Set(["name", "class", "label", "Species", "island"])).has(a)
+                });
+                data = result;
+                data2 = result.map(d => attrs.map((a, i) => d[a]));
+                classes1 = result.map(d => d.Species);
+                data2 = data2.slice(0, data2.length);
+                var headerLine = "";
+
+                for (var n1 = 0; n1 < data2.length; n1++) {
+                    sLen.push(data2[n1][0]);
+                }
+
+                for (var n2 = 0; n2 < data2.length; n2++) {
+                    sWd.push(data2[n2][1]);
+                }
+
+                for (var n3 = 0; n3 < data2.length; n3++) {
+                    pLen.push(data2[n3][2]);
+                }
+
+                for (var n4 = 0; n4 < data2.length; n4++) {
+                    pWd.push(data2[n4][3]);
+                }
+                draw(sWd, sLen);
+                /*var one = new Array();
+                var two = new Array();
+                for (var j = 0; j < 50; j++) {
+                    one.push(data2[j][0])
+                    two.push(data2[j][1])
+                }
+                one.sort();
+                two.sort();
+                console.log(one, two);*/
+                var mod = document.getElementById("mod");
+
+                state = true;
+            }).catch(e => {
+                console.log(e)
+            });
+        //===========================================================================================================//
+        //===========================================================================================================//
+        const tooltip = d3.select("body")
+            .append("div")
+            .style("position", "absolute")
+            .style("opacity", 0)
+            .style("padding", "10px")
+            .style("border", "2px solid black")
+            .style("width", "100px")
+            .style("pointer-events", "none")
+            .style("background", "white")
+            .style("text-align", "center");
+
+        const info = d3.select("body")
+            .append("div")
+            .style("position", "absolute")
+            .style("left", "700px")
+            .style("top", "300px")
+            .style("padding", "10px")
+            .style("border", "none")
+            .style("background", "#f5deb3")
+            .style("width", "100px")
+            .style("height", "50px")
+            .style("text-align", "center");
+
+        function draw(q, p) {
+            let svg = d3.select("body").select("div")
+                .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .attr("viewBox", [0, 0, W, W + 10])
+                .append("g")
+                .attr("transform",
+                    "translate(" + margin.left + "," + margin.top + ")")
+
+            var x = d3.scaleLinear()
+                .domain([0, 5])
+                .range([0, width])
+            svg.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(x));
+            svg.append("text")
+                .attr("text-anchor", "end")
+                .attr("x", width / 2 + margin.left - 7)
+                .attr("y", height + margin.top + 25)
+                .text("Width");
+
+            var y = d3.scaleLinear()
+                .domain([0, 8])
+                .range([height, 0])
+            svg.append("g")
+                .call(d3.axisLeft(y));
+            svg.append("text")
+                .attr("text-anchor", "end")
+                .attr("transform", "rotate(-90)")
+                .attr("y", -margin.left + 20)
+                .attr("x", -margin.top - height / 2 + 20)
+                .text("Length");
+
+            function mouseover(event, d) {
+                if (mod.value == 'SepalData') {
+                    tooltip.html("Length : " + d[0] + "<br/>" + "Width : " + d[1])
+                }
+                if (mod.value == 'PetalData') {
+                    tooltip.html("Length : " + d[2] + "<br/>" + "Width : " + d[3])
+                }
+                tooltip.style("opacity", 1)
+                    .style("left", (event.pageX) + "px")
+                    .style("top", (event.pageY - 60) + "px")
+                d3.select(this).style("r", 7).style("stroke", "#e57373");
+            }
+
+            function mouseout(d) {
+                d3.select(this).style("r", 5).style("stroke", "gray")
+                tooltip.style("opacity", 0);
+            }
+
+            function click(event, d) {
+                var colr = d3.select(this).style("fill") == "white" ? "yellow" : "white";
+                d3.select(this).style("fill", colr)
+                if (mod.value == 'SepalData') {
+                    info.html("Length : " + d[0] + "<br/>" + "Width : " + d[1])
+                }
+                if (mod.value == 'PetalData') {
+                    info.html("Length : " + d[2] + "<br/>" + "Width : " + d[3])
+                }
+            }
+
+            let gs = svg.selectAll(".point")
+                .data(data2)
+                .enter()
+                .append("g")
+                .append("circle")
+                .attr("id", "c1")
+                .attr("class", "point")
+                .attr("fill", "white")
+                .attr("stroke", "gray")
+                .style("stroke-width", 4)
+                .attr("cx", (d, i) => x(q[i]))
+                .attr("cy", (d, i) => y(p[i]))
+                .attr("r", 5)
+                .on("mouseover", mouseover)
+                .on("mouseout", mouseout)
+                .on("click", click)
+        }
+
+        function changeMod() { //option에 따른 onchange event 처리
+            if (state == true) {
+                var mod = document.getElementById("mod"); //.options[document.getElementById("mod").selectedIndex].value;
+
+                if (mod.value == 'SepalData') {
+                    d3.select("svg").remove();
+                    size_slider.min = 2, size_slider.max = 4.5, size_slider.value = 2;
+                    size_num.min = 2, size_num.max = 4.5, size_num.value = 2;
+                    draw(sWd, sLen);
+                }
+                if (mod.value == 'PetalData') {
+                    d3.select("svg").remove();
+                    size_slider.min = 0, size_slider.max = 2.6, size_slider.value = 0;
+                    size_num.min = 0, size_num.max = 2.6, size_num.value = 0;
+                    draw(pWd, pLen);
+                }
+            }
+        }
+
+        function changeSpe() {
+            var spe = document.getElementById("spe");
+            if (spe.value == 'all') {
+                /*size_slider.style.opacity = 1;
+                size_num.style.opacity = 1;
+                size_text.style.opacity = 1;
+                size_slider.disabled = false;
+                size_num.disabled = false;*/
+                for (var i1 = 0; i1 < 150; i1++) {
+                    c1[i1].style.display = 'block';
+                }
+                changeMod();
+            } else {
+                /*size_slider.style.opacity = 0;
+                size_num.style.opacity = 0;
+                size_text.style.opacity = 0;
+                size_slider.disabled = true;
+                size_num.disabled = true;*/
+                //===============================================//
+                if (spe.value == 'setosa') {
+                    for (var i2 = 0; i2 < 150; i2++) {
+                        c1[i2].style.display = 'block';
+                    }
+                    for (var i3 = 50; i3 < 150; i3++) {
+                        c1[i3].style.display = 'none';
+                    }
+                }
+                //===============================================//
+                if (spe.value == 'versicolor') {
+                    for (var i4 = 0; i4 < 150; i4++) {
+                        c1[i4].style.display = 'block';
+                    }
+                    for (var i5 = 0; i5 < 50; i5++) {
+                        c1[i5].style.display = 'none';
+                    }
+                    for (var i6 = 100; i6 < 150; i6++) {
+                        c1[i6].style.display = 'none';
+                    }
+                }
+                //===============================================//
+                if (spe.value == 'verginica') {
+                    for (var i7 = 0; i7 < 150; i7++) {
+                        c1[i7].style.display = 'block';
+                    }
+                    for (var i8 = 0; i8 < 100; i8++) {
+                        c1[i8].style.display = 'none';
+                    }
+                }
+                //===============================================//
+            }
+        }
+    </script>
+</body>
+
+</html>
